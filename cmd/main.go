@@ -2,9 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"os"
 	"reflect"
+	"strconv"
 )
 
 type Match struct {
@@ -13,13 +15,10 @@ type Match struct {
 	TargetKey string
 }
 
-func main() {
-	if len(os.Args) != 3 {
-		fmt.Println("Usage: go run main.go <source.json> <target.json>")
-		os.Exit(1)
-	}
+var skipNums bool
 
-	sourceFile, targetFile := os.Args[1], os.Args[2]
+func main() {
+	sourceFile, targetFile := parseArgs()
 
 	sourceData, err := os.ReadFile(sourceFile)
 	if err != nil {
@@ -35,8 +34,8 @@ func main() {
 	json.Unmarshal(sourceData, &sourceJson)
 	json.Unmarshal(targetData, &targetJson)
 
-	sourceMap := make(map[string]string)
-	targetMap := make(map[string]string)
+	sourceMap := make(map[string][]string)
+	targetMap := make(map[string][]string)
 
 	flattenJson(sourceJson, "", sourceMap)
 	flattenJson(targetJson, "", targetMap)
@@ -46,7 +45,18 @@ func main() {
 
 }
 
-func flattenJson(data interface{}, prefix string, flatMap map[string]string) {
+func parseArgs() (string, string) {
+	flag.BoolVar(&skipNums, "skipnums", false, "Skip comparing numeric values")
+	flag.Parse()
+	args := flag.Args()
+	if len(args) != 2 {
+		fmt.Println("Usage: go run main.go [-skipnums] <source.json> <target.json>")
+		os.Exit(1)
+	}
+	return args[0], args[1]
+}
+
+func flattenJson(data interface{}, prefix string, flatMap map[string][]string) {
 	if reflect.TypeOf(data) == nil {
 		return
 	}
@@ -60,21 +70,34 @@ func flattenJson(data interface{}, prefix string, flatMap map[string]string) {
 		for i, value := range data.([]interface{}) {
 			flattenJson(value, fmt.Sprintf("%s%d.", prefix, i), flatMap)
 		}
+	case reflect.Bool:
+		return
 	default:
-		flatMap[prefix] = fmt.Sprintf("%v", data)
+		valStr := fmt.Sprintf("%v", data)
+		flatMap[valStr] = append(flatMap[valStr], prefix)
 	}
 }
 
-func findMatches(source, target map[string]string) []Match {
+func findMatches(source, target map[string][]string) []Match {
 	var matches []Match
-	for sourceKey, sourceVal := range source {
-		for targetKey, targetVal := range target {
-			if sourceVal == targetVal {
-				matches = append(matches, Match{Value: sourceVal, SourceKey: sourceKey, TargetKey: targetKey})
+	for val, sourceKeys := range source {
+		if skipNums && isNumeric(val) {
+			continue
+		}
+		if targetKeys, exists := target[val]; exists {
+			for _, sKey := range sourceKeys {
+				for _, tKey := range targetKeys {
+					matches = append(matches, Match{Value: val, SourceKey: sKey, TargetKey: tKey})
+				}
 			}
 		}
 	}
 	return matches
+}
+
+func isNumeric(s string) bool {
+	_, err := strconv.ParseFloat(s, 64)
+	return err == nil
 }
 
 func printMatches(matches []Match) {
