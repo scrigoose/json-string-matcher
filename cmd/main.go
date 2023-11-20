@@ -42,9 +42,8 @@ func main() {
 	flattenJson(targetJson, "", targetMap)
 
 	matches := findMatches(sourceMap, targetMap)
-	for _, match := range matches {
-		fmt.Printf("---\nValue: %s\nSource Key: %s\nTarget Key: %s\n", match.Value, match.SourceKey, match.TargetKey)
-	}
+	printMatches(matches)
+
 }
 
 func flattenJson(data interface{}, prefix string, flatMap map[string]string) {
@@ -76,4 +75,11 @@ func findMatches(source, target map[string]string) []Match {
 		}
 	}
 	return matches
+}
+
+func printMatches(matches []Match) {
+	for _, match := range matches {
+		fmt.Printf("---\nValue: %s\nSource Key: %s\nTarget Key: %s\n", match.Value, match.SourceKey, match.TargetKey)
+	}
+	fmt.Println("---")
 }
