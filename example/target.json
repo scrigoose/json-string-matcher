@@ -1,0 +1,26 @@
+{
+    "tools": [
+      {
+        "shovel": {
+          "details": {
+            "purpose": "Heavy-duty gardening shovel",
+            "material": "steel"
+          }
+        }
+      },
+      {
+        "rake": {
+          "function": "gathering leaves",
+          "description": "Leaf rake with ergonomic handle"
+        }
+      }
+    ],
+    "supplier": {
+      "name": "GreenThumb Inc.",
+      "contact_info": {
+        "email_address": "sales@greenthumb.com",
+        "phone_number": "123-456-7890"
+      }
+    }
+  }
+  

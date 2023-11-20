@@ -1,0 +1,21 @@
+{
+    "name": "Garden Tools",
+    "items": [
+      {
+        "id": 101,
+        "type": "shovel",
+        "description": "Heavy-duty gardening shovel"
+      },
+      {
+        "id": 102,
+        "type": "rake",
+        "description": "Leaf rake with ergonomic handle"
+      }
+    ],
+    "manufacturer": "GreenThumb Inc.",
+    "contact": {
+      "email": "contact@greenthumb.com",
+      "phone": "123-456-7890"
+    }
+  }
+  
